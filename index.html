@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ScamShield — ScamShield Security Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f8f9fb;
+      --white: #ffffff;
+      --sidebar-bg: #1d2230;
+      --sidebar-hover: #2a3245;
+      --sidebar-active: #f6821f;
+      --border: #e4e7ed;
+      --border-light: #f0f2f5;
+      --text: #1a1d23;
+      --text-2: #4b5563;
+      --text-3: #9ca3af;
+      --orange: #f6821f;
+      --orange-light: #fff7f0;
+      --orange-border: #fed7aa;
+      --blue: #1d4ed8;
+      --blue-light: #eff6ff;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --green-border: #bbf7d0;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --red-border: #fecaca;
+      --yellow: #d97706;
+      --yellow-light: #fffbeb;
+      --yellow-border: #fde68a;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, .07), 0 2px 4px -1px rgba(0, 0, 0, .04);
+      --radius: 8px;
+      --sidebar-w: 220px;
+      --topbar-h: 56px;
+      --font: 'Inter', -apple-system, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07);
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      background: var(--orange);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .logo-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.01em;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .4);
+      margin-top: 1px;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: rgba(255, 255, 255, .3);
+      text-transform: uppercase;
+      padding: 20px 20px 6px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, .65);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-item:hover {
+      background: var(--sidebar-hover);
+      color: #fff;
+    }
+
+    .sidebar-item.active {
+      background: rgba(246, 130, 31, .12);
+      color: #fff;
+      border-left-color: var(--orange);
+    }
+
+    .sidebar-item svg {
+      flex-shrink: 0;
+      opacity: .7;
+    }
+
+    .sidebar-item.active svg,
+    .sidebar-item:hover svg {
+      opacity: 1;
+    }
+
+    .sidebar-sub {
+      padding: 5px 20px 5px 46px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .45);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .15s;
+      display: block;
+    }
+
+    .sidebar-sub:hover,
+    .sidebar-sub.active {
+      color: rgba(255, 255, 255, .9);
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-w);
+      right: 0;
+      height: var(--topbar-h);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 90;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .domain-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .domain-chip .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    .active-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green);
+      background: var(--green-light);
+      border: 1px solid var(--green-border);
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      transition: all .15s;
+      text-decoration: none;
+    }
+
+    .topbar-btn:hover {
+      background: var(--bg);
+    }
+
+    .topbar-btn.primary {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange);
+    }
+
+    .topbar-btn.primary:hover {
+      background: #e8731a;
+    }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      padding-top: var(--topbar-h);
+      min-height: 100vh;
+    }
+
+    .page-content {
+      padding: 32px;
+      max-width: 1080px;
+    }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      margin-bottom: 24px;
+    }
+
+    .page-breadcrumb {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 4px;
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.025em;
+    }
+
+    .page-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 4px;
+    }
+
+    .doc-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--blue);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 12px;
+      background: var(--white);
+      text-decoration: none;
+      transition: background .15s;
+    }
+
+    .doc-link:hover {
+      background: var(--blue-light);
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-item {
+      padding: 18px 24px;
+      border-right: 1px solid var(--border);
+    }
+
+    .stat-item:last-child {
+      border-right: none;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .stat-value.orange {
+      color: var(--orange);
+    }
+
+    .stat-value.green {
+      color: var(--green);
+    }
+
+    .stat-value.red {
+      color: var(--red);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    .card-body {
+      padding: 20px;
+    }
+
+    /* ── FORM ELEMENTS ── */
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      resize: vertical;
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(246, 130, 31, .1);
+    }
+
+    textarea::placeholder {
+      color: var(--text-3);
+    }
+
+    .form-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    /* Sample chips */
+    .sample-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sample-label {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    .chip {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--white);
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s;
+    }
+
+    .chip:hover {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: var(--orange-light);
+    }
+
+    .chip.safe:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-light);
+    }
+
+    .char-count {
+      font-size: 11px;
+      color: var(--text-3);
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange);
+    }
+
+    .btn-primary:hover {
+      background: #e8731a;
+    }
+
+    .btn-primary:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--text-2);
+      border-color: var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    /* ── NOTICE BANNER ── */
+    .notice {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 14px 18px;
+      border-radius: 6px;
+      margin-bottom: 16px;
+    }
+
+    .notice.info {
+      background: var(--blue-light);
+      border: 1px solid #bfdbfe;
+    }
+
+    .notice.warn {
+      background: var(--yellow-light);
+      border: 1px solid var(--yellow-border);
+    }
+
+    .notice-icon {
+      font-size: 15px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .notice-body {
+      font-size: 13px;
+      color: var(--text-2);
+      line-height: 1.5;
+    }
+
+    .notice-title {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+
+    /* ── CRYPTO BADGES ── */
+    .crypto-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border-light);
+      background: var(--bg);
+    }
+
+    .crypto-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-2);
+      background: var(--white);
+      border: 1px solid var(--border);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    .crypto-badge .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    /* ── RESULT AREA ── */
+    #result-area {
+      display: none;
+    }
+
+    #result-area.show {
+      display: block;
+      animation: fadeIn .3s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Risk header */
+    .risk-header {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 20px;
+    }
+
+    .threat-badge-big {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .threat-badge-big.safe {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green-border);
+    }
+
+    .threat-badge-big.yellow {
+      background: var(--yellow-light);
+      color: var(--yellow);
+      border: 1px solid var(--yellow-border);
+    }
+
+    .threat-badge-big.orange {
+      background: #fff4ee;
+      color: var(--orange);
+      border: 1px solid var(--orange-border);
+    }
+
+    .threat-badge-big.red {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid var(--red-border);
+    }
+
+    /* Risk bar */
+    .risk-bar-section {
+      flex: 1;
+    }
+
+    .risk-bar-track {
+      height: 8px;
+      background: var(--border-light);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .risk-bar-fill {
+      height: 100%;
+      width: 0;
+      border-radius: 4px;
+      transition: width 1.2s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .risk-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-3);
+      margin-top: 5px;
+    }
+
+    .score-display {
+      text-align: right;
+    }
+
+    .score-num {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .score-denom {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px;
+    }
+
+    /* Metrics grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--border-light);
+    }
+
+    .metric-cell {
+      padding: 16px 20px;
+      border-right: 1px solid var(--border-light);
+      text-align: center;
+    }
+
+    .metric-cell:last-child {
+      border-right: none;
+    }
+
+    .metric-val {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .metric-key {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: 3px;
+    }
+
+    /* Pattern analysis */
+    .pattern-list {
+      padding: 4px 0;
+    }
+
+    .pat-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .pat-row:last-child {
+      border-bottom: none;
+    }
+
+    .pat-name {
+      font-size: 12px;
+      color: var(--text-2);
+      width: 180px;
+      flex-shrink: 0;
+    }
+
+    .pat-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .pat-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .8s ease;
+    }
+
+    .pat-pct {
+      font-size: 12px;
+      color: var(--text-3);
+      font-weight: 600;
+      width: 40px;
+      text-align: right;
+    }
+
+    .pat-hits {
+      font-size: 11px;
+      color: var(--text-3);
+      width: 50px;
+      text-align: right;
+    }
+
+    /* Crypto detail table */
+    .detail-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .detail-table tr {
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .detail-table tr:last-child {
+      border-bottom: none;
+    }
+
+    .detail-table td {
+      padding: 10px 0;
+      font-size: 12px;
+      vertical-align: top;
+    }
+
+    .detail-table td:first-child {
+      color: var(--text-3);
+      font-weight: 500;
+      width: 200px;
+    }
+
+    .detail-table td:last-child {
+      color: var(--text);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 11px;
+      word-break: break-all;
+    }
+
+    .tag-green {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--green-light);
+      color: var(--green);
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* ── LOADING OVERLAY ── */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, .75);
+      backdrop-filter: blur(4px);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    #loading-overlay.on {
+      display: flex;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: var(--orange);
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loading-text {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+
+    .loading-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .ls {
+      font-size: 12px;
+      color: var(--text-3);
+      opacity: 0;
+      transition: all .25s;
+    }
+
+    .ls.on {
+      color: var(--orange);
+      opacity: 1;
+      font-weight: 500;
+    }
+
+    .ls.done {
+      color: var(--green);
+      opacity: .7;
+    }
+
+    .ls.done::before {
+      content: "✓ ";
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main {
+        margin-left: 0;
+      }
+
+      .topbar {
+        left: 0;
+      }
+
+      .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .metrics-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .risk-header {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .page-content {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">S</div>
+      <div>
+        <div class="logo-text">ScamShield</div>
+        <div class="logo-sub">v3.0 · NIST PQC</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-label">Security</div>
+
+    <a class="sidebar-item active" href="/">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>
+      Scanner
+    </a>
+    <a class="sidebar-item" href="/admin">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>
+      Dashboard
+    </a>
+
+    <div class="sidebar-section-label">Encryption</div>
+
+    <div class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+      Kyber-512
+    </div>
+    <div class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+      </svg>
+      Dilithium-3
+    </div>
+    <div class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+      </svg>
+      BFV Homomorphic
+    </div>
+
+    <div class="sidebar-section-label">ML Model</div>
+
+    <div class="sidebar-item">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+      </svg>
+      Gradient Boost
+    </div>
+    <a class="sidebar-sub" href="/admin">Threat Analytics</a>
+    <a class="sidebar-sub" href="/admin">Scan History</a>
+  </aside>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="domain-chip">
+        <div class="status-dot"></div>
+        scamshield.local
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </div>
+      <span class="active-badge">● Active</span>
+    </div>
+    <div class="topbar-right">
+      <a href="/admin" class="topbar-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+        Admin Dashboard
+      </a>
+      <button class="topbar-btn primary" onclick="doScan()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8" />
+          <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        New Scan
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-content">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <div class="page-breadcrumb">Security</div>
+        <div class="page-title">Scam Signature Scanner</div>
+        <div class="page-desc">Analyze messages using post-quantum cryptography and privacy-preserving homomorphic ML
+          inference.</div>
+        <a href="#" class="doc-link">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+          </svg>
+          View documentation
+        </a>
+      </div>
+
+      <!-- Stats bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-label">Encryption</div>
+          <div class="stat-value orange">KYBER-512</div>
+          <div class="stat-sub">NIST FIPS 203</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Signature</div>
+          <div class="stat-value orange">DILITHIUM-3</div>
+          <div class="stat-sub">NIST FIPS 204</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">HE Scheme</div>
+          <div class="stat-value orange">BFV-4096</div>
+          <div class="stat-sub">Privacy-preserving eval</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Plaintext stored</div>
+          <div class="stat-value green">NEVER</div>
+          <div class="stat-sub">SHA3-256 hash only</div>
+        </div>
+      </div>
+
+      <!-- Info notice -->
+      <div class="notice info">
+        <div class="notice-icon">ℹ️</div>
+        <div class="notice-body">
+          <div class="notice-title">Privacy-preserving architecture</div>
+          Your message is encapsulated with Kyber-512 and signed with Dilithium-3 before any analysis begins. The ML
+          model evaluates encrypted feature vectors — your plaintext is never exposed, stored, or logged.
+        </div>
+      </div>
+
+      <!-- Scanner card -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Message Analysis</div>
+            <div class="card-subtitle">Paste a message to scan for scam signatures</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--green);font-weight:500;">
+            <div
+              style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite;">
+            </div>
+            Engine ready
+          </div>
+        </div>
+        <div class="card-body">
+          <label class="form-label" for="msg-input">Message input</label>
+          <textarea id="msg-input"
+            placeholder="Paste or type a message here…
+
+Example: &quot;URGENT — your bank account has been suspended. Verify your SSN and credit card details immediately at this link or face permanent closure.&quot;"></textarea>
+
+          <div class="form-footer">
+            <div class="sample-group">
+              <span class="sample-label">Load sample:</span>
+              <button class="chip" onclick="loadSample('p')">⚠ Phishing</button>
+              <button class="chip" onclick="loadSample('l')">⚠ Lottery</button>
+              <button class="chip" onclick="loadSample('a')">⚠ Advance fee</button>
+              <button class="chip" onclick="loadSample('c')">⚠ Crypto scam</button>
+              <button class="chip safe" onclick="loadSample('ok')">✓ Legitimate</button>
+            </div>
+            <div class="char-count"><span id="cc">0</span> / 5,000 chars</div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-primary" id="scan-btn" onclick="doScan()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Analyze message
+            </button>
+            <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
+          </div>
+        </div>
+        <div class="crypto-row">
+          <div class="crypto-badge">
+            <div class="dot"></div> Kyber-512 active
+          </div>
+          <div class="crypto-badge">
+            <div class="dot"></div> Dilithium-3 active
+          </div>
+          <div class="crypto-badge">
+            <div class="dot"></div> BFV-4096 HE
+          </div>
+          <div class="crypto-badge">
+            <div class="dot"></div> Gradient Boost ML
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT -->
+      <div id="result-area">
+
+        <!-- Risk overview card -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Threat Assessment</div>
+              <div class="card-subtitle">Ensemble risk score from ML + pattern + homomorphic evaluation</div>
+            </div>
+            <div id="r-ts" style="font-size:11px;color:var(--text-3);font-family:'SF Mono','Fira Code',monospace;">
+            </div>
+          </div>
+
+          <div class="risk-header">
+            <div class="threat-badge-big" id="r-badge">—</div>
+
+            <div class="risk-bar-section">
+              <div class="risk-bar-track">
+                <div class="risk-bar-fill" id="r-bar"></div>
+              </div>
+              <div class="risk-labels">
+                <span>Safe</span><span>Moderate</span><span>High</span><span>Critical</span>
+              </div>
+            </div>
+
+            <div class="score-display">
+              <div class="score-num" id="r-score">—</div>
+              <div class="score-denom">risk score / 100</div>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-cell">
+              <div class="metric-val" id="r-ml">—</div>
+              <div class="metric-key">ML Confidence</div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-val" id="r-pat">—</div>
+              <div class="metric-key">Pattern Risk</div>
+            </div>
+            <div class="metric-cell">
+              <div class="metric-val" id="r-he">—</div>
+              <div class="metric-key">HE Score</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pattern analysis -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Pattern Analysis</div>
+              <div class="card-subtitle">10-rule weighted regex scan across threat categories</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="pattern-list" id="r-patterns"></div>
+          </div>
+        </div>
+
+        <!-- Cryptographic proof -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Cryptographic Proof</div>
+              <div class="card-subtitle">Post-quantum signatures and homomorphic metadata</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <table class="detail-table">
+              <tr>
+                <td>Kyber-512 ciphertext</td>
+                <td id="r-ct">—</td>
+              </tr>
+              <tr>
+                <td>Dilithium-3 signature</td>
+                <td id="r-sig">—</td>
+              </tr>
+              <tr>
+                <td>HE polynomial hash</td>
+                <td id="r-ph">—</td>
+              </tr>
+              <tr>
+                <td>Message fingerprint (SHA3-256)</td>
+                <td id="r-fp">—</td>
+              </tr>
+              <tr>
+                <td>Scan duration</td>
+                <td id="r-ms">—</td>
+              </tr>
+              <tr>
+                <td>Plaintext stored</td>
+                <td><span class="tag-green">Never — hash only</span></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /result-area -->
+    </div>
+  </main>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loading-overlay">
+    <div class="spinner"></div>
+    <div class="loading-text">Analyzing message…</div>
+    <div class="loading-steps">
+      <div class="ls" id="ls0">Kyber-512 key encapsulation</div>
+      <div class="ls" id="ls1">Dilithium-3 message signing</div>
+      <div class="ls" id="ls2">BFV feature encoding</div>
+      <div class="ls" id="ls3">Homomorphic pattern evaluation</div>
+      <div class="ls" id="ls4">Gradient Boost inference</div>
+      <div class="ls" id="ls5">Ensemble risk computation</div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .3
+      }
+    }
+  </style>
+
+  <script>
+    const SAMPLES = {
+      p: "URGENT: Your bank account has been suspended due to suspicious activity. Click here immediately to verify your credit card and social security number, or your account will be permanently closed within 24 hours.",
+      l: "CONGRATULATIONS! You are the selected winner of $2,500,000 in our international lottery. To claim your prize, please send your bank account details and a $200 processing fee via Western Union immediately.",
+      a: "Dear Beneficiary, I am a Nigerian prince with $45 million USD I must transfer offshore urgently. I need your assistance and will reward you generously. Please send your SSN and bank account details to proceed.",
+      c: "INVESTMENT ALERT: Double your Bitcoin guaranteed! Risk-free 500% crypto returns in 30 days. Wire 0.5 BTC now to lock in your position. Act fast — this offer expires at midnight tonight.",
+      ok: "Hi Sarah, just a quick reminder that our team sync is scheduled for Thursday at 2pm in Conference Room B. Could you please review the Q3 slides beforehand? Let me know if you have any questions. Thanks!"
+    };
+
+    const ta = document.getElementById('msg-input');
+    ta.addEventListener('input', () => document.getElementById('cc').textContent = ta.value.length.toLocaleString());
+    function loadSample(k) { ta.value = SAMPLES[k] || ''; document.getElementById('cc').textContent = ta.value.length.toLocaleString(); }
+    function clearAll() { ta.value = ''; document.getElementById('cc').textContent = '0'; document.getElementById('result-area').classList.remove('show'); }
+
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function doScan() {
+      const msg = ta.value.trim();
+      if (!msg) { ta.focus(); return; }
+      const ov = document.getElementById('loading-overlay');
+      document.getElementById('scan-btn').disabled = true;
+      ov.classList.add('on');
+
+      const steps = Array.from({ length: 6 }, (_, i) => document.getElementById('ls' + i));
+      steps.forEach(s => s.className = 'ls');
+
+      for (let i = 0; i < 6; i++) {
+        await sleep(270);
+        if (i > 0) steps[i - 1].classList.add('done');
+        steps[i].classList.add('on');
+      }
+
+      try {
+        const res = await fetch('/api/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) });
+        const d = await res.json();
+        ov.classList.remove('on');
+        steps.forEach(s => s.className = 'ls');
+        document.getElementById('scan-btn').disabled = false;
+        if (d.error) { alert(d.error); return; }
+        render(d);
+      } catch (e) {
+        ov.classList.remove('on');
+        document.getElementById('scan-btn').disabled = false;
+        alert('Backend not running. Start with: python app.py');
+      }
+    }
+
+    function render(d) {
+      // Badge
+      const badge = document.getElementById('r-badge');
+      const badgeMap = { Safe: 'safe', Moderate: 'yellow', High: 'orange', Critical: 'red' };
+      const iconMap = { Safe: '✓', Moderate: '◈', High: '⚠', Critical: '☣' };
+      badge.className = `threat-badge-big ${badgeMap[d.level] || 'orange'}`;
+      badge.textContent = `${iconMap[d.level] || '!'} ${d.level}`;
+
+      // Score
+      const sc = document.getElementById('r-score');
+      sc.textContent = d.score;
+      sc.style.color = d.color;
+
+      // Bar
+      const bar = document.getElementById('r-bar');
+      bar.style.background = d.color;
+      bar.style.boxShadow = `0 0 8px ${d.color}40`;
+      document.getElementById('result-area').classList.add('show');
+      setTimeout(() => bar.style.width = d.score + '%', 80);
+
+      document.getElementById('r-ml').textContent = d.ml_prob + '%';
+      document.getElementById('r-pat').textContent = d.pat_risk + '%';
+      document.getElementById('r-he').textContent = d.he_score + '%';
+      document.getElementById('r-ts').textContent = d.ts.replace('T', ' ').replace('Z', ' UTC');
+      document.getElementById('r-ct').textContent = d.kyber.ciphertext;
+      document.getElementById('r-sig').textContent = d.sig;
+      document.getElementById('r-ph').textContent = d.he_ph;
+      document.getElementById('r-fp').textContent = d.fp;
+      document.getElementById('r-ms').textContent = d.ms + ' ms';
+
+      // Patterns
+      const pl = document.getElementById('r-patterns');
+      pl.innerHTML = '';
+      const colors = { 0: '#dc2626', 1: '#ea580c', 2: '#d97706', 3: '#16a34a' };
+      for (const p of d.pat_details) {
+        const ci = p.score >= 60 ? 0 : p.score >= 35 ? 1 : p.score >= 10 ? 2 : 3;
+        const row = document.createElement('div');
+        row.className = 'pat-row';
+        row.innerHTML = `
+      <div class="pat-name">${p.name}</div>
+      <div class="pat-bar-wrap"><div class="pat-bar-fill" style="width:0;background:${colors[ci]}" data-w="${p.score}"></div></div>
+      <div class="pat-pct">${p.score}%</div>
+      <div class="pat-hits">${p.hits} hit${p.hits !== 1 ? 's' : ''}</div>`;
+        pl.appendChild(row);
+      }
+      setTimeout(() => {
+        pl.querySelectorAll('.pat-bar-fill').forEach(el => el.style.width = el.dataset.w + '%');
+      }, 100);
+
+      document.getElementById('result-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+</body>
+
+</html>

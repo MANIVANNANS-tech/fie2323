@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ScamShield — Bulk Scanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #f8f9fb;
+      --white: #fff;
+      --sidebar-bg: #1d2230;
+      --sidebar-hover: #2a3245;
+      --border: #e4e7ed;
+      --border-light: #f0f2f5;
+      --text: #1a1d23;
+      --text-2: #4b5563;
+      --text-3: #9ca3af;
+      --orange: #f6821f;
+      --orange-light: #fff7f0;
+      --orange-border: #fed7aa;
+      --blue: #1d4ed8;
+      --blue-light: #eff6ff;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --green-border: #bbf7d0;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --red-border: #fecaca;
+      --yellow: #d97706;
+      --yellow-light: #fffbeb;
+      --yellow-border: #fde68a;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+      --radius: 8px;
+      --sw: 220px;
+      --th: 56px;
+      --font: 'Inter', -apple-system, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sw);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07)
+    }
+
+    .lm {
+      width: 32px;
+      height: 32px;
+      background: var(--orange);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .lt {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .ls- {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .4);
+      margin-top: 1px
+    }
+
+    .sl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: rgba(255, 255, 255, .3);
+      text-transform: uppercase;
+      padding: 20px 20px 6px
+    }
+
+    .si {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, .65);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+      border-left: 3px solid transparent
+    }
+
+    .si:hover {
+      background: var(--sidebar-hover);
+      color: #fff
+    }
+
+    .si.active {
+      background: rgba(246, 130, 31, .12);
+      color: #fff;
+      border-left-color: var(--orange)
+    }
+
+    .si svg {
+      flex-shrink: 0;
+      opacity: .7
+    }
+
+    .si.active svg,
+    .si:hover svg {
+      opacity: 1
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sw);
+      right: 0;
+      height: var(--th);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 90;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .dc {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500
+    }
+
+    .sdot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green)
+    }
+
+    .tbtn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      transition: all .15s;
+      text-decoration: none
+    }
+
+    .tbtn:hover {
+      background: var(--bg)
+    }
+
+    .tbtn.primary {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange)
+    }
+
+    .tbtn.primary:hover {
+      background: #e8731a
+    }
+
+    .main {
+      margin-left: var(--sw);
+      padding-top: var(--th);
+      min-height: 100vh
+    }
+
+    .page-content {
+      padding: 32px;
+      max-width: 960px
+    }
+
+    .page-breadcrumb {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 4px
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -.025em;
+      margin-bottom: 4px
+    }
+
+    .page-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-bottom: 24px
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light)
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px
+    }
+
+    .card-body {
+      padding: 20px
+    }
+
+    .flabel {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 6px;
+      display: block
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      font-family: var(--font);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s
+    }
+
+    textarea:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(246, 130, 31, .1)
+    }
+
+    textarea::placeholder {
+      color: var(--text-3)
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 6px
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all .15s
+    }
+
+    .btn-primary {
+      background: var(--orange);
+      color: #fff;
+      border-color: var(--orange)
+    }
+
+    .btn-primary:hover {
+      background: #e8731a
+    }
+
+    .btn-primary:disabled {
+      opacity: .45;
+      cursor: not-allowed
+    }
+
+    .btn-secondary {
+      background: var(--white);
+      color: var(--text-2);
+      border-color: var(--border)
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg)
+    }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      align-items: center
+    }
+
+    .msg-count {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-left: auto
+    }
+
+    /* summary */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .smc {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 14px 16px;
+      text-align: center
+    }
+
+    .smc-val {
+      font-size: 22px;
+      font-weight: 700
+    }
+
+    .smc-key {
+      font-size: 10px;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: .04em
+    }
+
+    /* results list */
+    .result-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light)
+    }
+
+    .result-item:last-child {
+      border-bottom: none
+    }
+
+    .ri-idx {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
+      min-width: 24px
+    }
+
+    .ri-preview {
+      font-size: 13px;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .ri-score {
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 36px;
+      text-align: right
+    }
+
+    .ri-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap
+    }
+
+    .ri-badge.C {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid var(--red-border)
+    }
+
+    .ri-badge.H {
+      background: #fff4ee;
+      color: #ea580c;
+      border: 1px solid var(--orange-border)
+    }
+
+    .ri-badge.M {
+      background: var(--yellow-light);
+      color: var(--yellow);
+      border: 1px solid var(--yellow-border)
+    }
+
+    .ri-badge.S {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green-border)
+    }
+
+    .ri-bar {
+      width: 80px;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .ri-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .8s ease
+    }
+
+    #result-section {
+      display: none
+    }
+
+    #result-section.show {
+      display: block;
+      animation: fadein .3s ease
+    }
+
+    @keyframes fadein {
+      from {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    /* progress */
+    .progress-wrap {
+      display: none;
+      margin-top: 12px
+    }
+
+    .progress-wrap.show {
+      display: block
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 6px
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--orange);
+      border-radius: 3px;
+      transition: width .3s ease;
+      width: 0
+    }
+
+    .progress-label {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 5px
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="lm">S</div>
+      <div>
+        <div class="lt">ScamShield</div>
+        <div class="ls-">v4.0 · NIST PQC</div>
+      </div>
+    </div>
+    <div class="sl">Security</div>
+    <a class="si" href="/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>Scanner</a>
+    <a class="si active" href="/bulk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <rect x="2" y="3" width="20" height="4" />
+        <rect x="2" y="10" width="20" height="4" />
+        <rect x="2" y="17" width="20" height="4" />
+      </svg>Bulk Scanner</a>
+    <a class="si" href="/admin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>Dashboard</a>
+  </aside>
+
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="dc">
+        <div class="sdot"></div>quantum-engine.local
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <a href="/" class="tbtn">Single Scanner</a>
+      <a href="/admin" class="tbtn primary">Admin Dashboard</a>
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-content">
+      <div class="page-breadcrumb">Security</div>
+      <div class="page-title">Bulk Message Scanner</div>
+      <div class="page-desc">Analyze up to 50 messages at once. Each message is encrypted with Kyber-512, signed with
+        Dilithium-3, and scanned via homomorphic ML inference.</div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Message batch input</div>
+            <div class="card-sub">One message per line — up to 50 messages, 5000 chars each</div>
+          </div>
+          <div style="font-size:12px;color:var(--text-3)">Max 50 messages</div>
+        </div>
+        <div class="card-body">
+          <label class="flabel">Messages (one per line)</label>
+          <textarea id="bulk-input" rows="12" placeholder="URGENT: Your bank account suspended. Verify SSN immediately.
+Congratulations! You won $2,500,000. Send bank details to claim.
+Hi Sarah, can we reschedule Thursday's meeting to 3pm?
+FREE MONEY! Double your Bitcoin guaranteed 500% returns risk-free!
+Your package has shipped and will arrive by Friday."></textarea>
+          <div class="hint">Each non-empty line is treated as a separate message.</div>
+
+          <div class="progress-wrap" id="progress-wrap">
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-label" id="progress-label">Scanning…</div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-primary" id="bulk-btn" onclick="runBulk()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              Scan all messages
+            </button>
+            <button class="btn btn-secondary" onclick="clearBulk()">Clear</button>
+            <span class="msg-count" id="msg-count">0 messages</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="result-section">
+
+        <!-- Summary -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Batch summary</div>
+          </div>
+          <div class="card-body">
+            <div class="summary-grid">
+              <div class="smc">
+                <div class="smc-val" id="sum-total" style="color:var(--orange)">0</div>
+                <div class="smc-key">Total</div>
+              </div>
+              <div class="smc">
+                <div class="smc-val" id="sum-avg" style="color:#6366f1">0</div>
+                <div class="smc-key">Avg Risk</div>
+              </div>
+              <div class="smc">
+                <div class="smc-val" id="sum-critical" style="color:var(--red)">0</div>
+                <div class="smc-key">Critical</div>
+              </div>
+              <div class="smc">
+                <div class="smc-val" id="sum-high" style="color:#ea580c">0</div>
+                <div class="smc-key">High</div>
+              </div>
+              <div class="smc">
+                <div class="smc-val" id="sum-moderate" style="color:var(--yellow)">0</div>
+                <div class="smc-key">Moderate</div>
+              </div>
+              <div class="smc">
+                <div class="smc-val" id="sum-safe" style="color:var(--green)">0</div>
+                <div class="smc-key">Safe</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-message results -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">Per-message results</div>
+            <div id="sort-btns" style="display:flex;gap:6px">
+              <button onclick="sortResults('score')"
+                style="font-size:11px;padding:4px 10px;border:1px solid var(--border);background:var(--white);border-radius:4px;cursor:pointer;color:var(--text-2)">Sort
+                by risk ↓</button>
+              <button onclick="sortResults('index')"
+                style="font-size:11px;padding:4px 10px;border:1px solid var(--border);background:var(--white);border-radius:4px;cursor:pointer;color:var(--text-2)">Original
+                order</button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="results-list"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const ta = document.getElementById('bulk-input');
+    let allResults = [];
+
+    function countMsgs() {
+      const n = ta.value.split('\n').filter(l => l.trim()).length;
+      document.getElementById('msg-count').textContent = n + ' message' + (n !== 1 ? 's' : '');
+    }
+    ta.addEventListener('input', countMsgs);
+    countMsgs();
+
+    function clearBulk() {
+      ta.value = ''; countMsgs();
+      document.getElementById('result-section').classList.remove('show');
+    }
+
+    const levelIcon = { Critical: '☣', High: '⚠', Moderate: '◈', Safe: '✓' };
+    const levelColors = { Critical: '#dc2626', High: '#ea580c', Moderate: '#d97706', Safe: '#16a34a' };
+
+    async function runBulk() {
+      const lines = ta.value.split('\n').filter(l => l.trim());
+      if (!lines.length) { ta.focus(); return; }
+      if (lines.length > 50) { alert('Max 50 messages per batch.'); return; }
+
+      const btn = document.getElementById('bulk-btn');
+      btn.disabled = true;
+      btn.textContent = 'Scanning…';
+
+      const pw = document.getElementById('progress-wrap');
+      const pf = document.getElementById('progress-fill');
+      const pl = document.getElementById('progress-label');
+      pw.classList.add('show');
+      pf.style.width = '10%';
+      pl.textContent = `Encrypting and scanning ${lines.length} messages…`;
+
+      try {
+        const resp = await fetch('/api/bulk-scan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: lines })
+        });
+        const data = await resp.json();
+        if (data.error) { alert(data.error); return; }
+
+        pf.style.width = '100%';
+        pl.textContent = `Done — ${data.summary.total} messages scanned`;
+
+        allResults = data.results;
+        renderSummary(data.summary);
+        renderResults(allResults);
+        document.getElementById('result-section').classList.add('show');
+        document.getElementById('result-section').scrollIntoView({ behavior: 'smooth' });
+
+      } catch (e) {
+        alert('Backend not running. Start with: python app.py');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Scan all messages';
+      }
+    }
+
+    function renderSummary(s) {
+      document.getElementById('sum-total').textContent = s.total;
+      document.getElementById('sum-avg').textContent = s.avg_score;
+      document.getElementById('sum-critical').textContent = s.critical;
+      document.getElementById('sum-high').textContent = s.high;
+      document.getElementById('sum-moderate').textContent = s.moderate;
+      document.getElementById('sum-safe').textContent = s.safe;
+    }
+
+    function renderResults(results) {
+      const list = document.getElementById('results-list');
+      list.innerHTML = '';
+      for (const r of results) {
+        const col = levelColors[r.level] || '#6b7280';
+        const icon = levelIcon[r.level] || '?';
+        const badge = r.level[0];
+        const item = document.createElement('div');
+        item.className = 'result-item';
+        item.innerHTML = `
+      <div class="ri-idx">${r.index + 1}</div>
+      <div class="ri-preview" title="${r.preview}">${r.preview}</div>
+      <div class="ri-score" style="color:${col}">${r.score}</div>
+      <span class="ri-badge ${badge}">${icon} ${r.level}</span>
+      <div class="ri-bar"><div class="ri-fill" style="background:${col}" data-w="${r.score}"></div></div>`;
+        list.appendChild(item);
+      }
+      // animate bars
+      setTimeout(() => {
+        list.querySelectorAll('.ri-fill').forEach(el => el.style.width = el.dataset.w + '%');
+      }, 80);
+    }
+
+    function sortResults(by) {
+      const sorted = [...allResults].sort((a, b) => by === 'score' ? b.score - a.score : a.index - b.index);
+      renderResults(sorted);
+    }
+  </script>
+</body>
+
+</html>

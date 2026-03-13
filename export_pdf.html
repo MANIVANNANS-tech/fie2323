@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>ScamShield — Scan History Export</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      font-size: 11px;
+      color: #1a1d23;
+      background: #fff;
+    }
+
+    /* ── Print trigger ── */
+    @media screen {
+      .print-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        background: #f6821f;
+        color: #fff;
+        padding: 12px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      .print-btn {
+        padding: 7px 18px;
+        background: #fff;
+        color: #f6821f;
+        border: none;
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .content {
+        margin-top: 52px;
+      }
+    }
+
+    @media print {
+      .print-bar {
+        display: none;
+      }
+
+      .content {
+        margin-top: 0;
+      }
+
+      @page {
+        margin: 18mm 14mm;
+      }
+
+      tr {
+        page-break-inside: avoid;
+      }
+    }
+
+    .content {
+      padding: 24px 28px;
+    }
+
+    /* ── HEADER ── */
+    .doc-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 2px solid #f6821f;
+    }
+
+    .doc-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-sq {
+      width: 36px;
+      height: 36px;
+      background: #f6821f;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    .logo-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1a1d23;
+      letter-spacing: -.02em;
+    }
+
+    .logo-sub {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 1px;
+    }
+
+    .doc-meta {
+      text-align: right;
+      font-size: 10px;
+      color: #6b7280;
+      line-height: 1.7;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stat-box {
+      border: 1px solid #e4e7ed;
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+
+    .stat-val {
+      font-size: 22px;
+      font-weight: 800;
+    }
+
+    .stat-key {
+      font-size: 9px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 3px;
+    }
+
+    .stat-box.t .stat-val {
+      color: #f6821f;
+    }
+
+    .stat-box.a .stat-val {
+      color: #6366f1;
+    }
+
+    .stat-box.c .stat-val {
+      color: #dc2626;
+    }
+
+    .stat-box.h .stat-val {
+      color: #ea580c;
+    }
+
+    .stat-box.s .stat-val {
+      color: #16a34a;
+    }
+
+    /* ── SECTION TITLE ── */
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1d23;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e4e7ed;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title span {
+      font-size: 10px;
+      font-weight: 500;
+      color: #9ca3af;
+    }
+
+    /* ── TABLE ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: #f8f9fb;
+    }
+
+    th {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #6b7280;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 1px solid #e4e7ed;
+      white-space: nowrap;
+    }
+
+    td {
+      font-size: 10px;
+      padding: 7px 10px;
+      border-bottom: 1px solid #f0f2f5;
+      color: #374151;
+      vertical-align: top;
+    }
+
+    tr:nth-child(even) td {
+      background: #fafafa;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-size: 9px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .bC {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .bH {
+      background: #fff4ee;
+      color: #ea580c;
+      border: 1px solid #fed7aa;
+    }
+
+    .bM {
+      background: #fffbeb;
+      color: #d97706;
+      border: 1px solid #fde68a;
+    }
+
+    .bS {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    .score-crit {
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .score-high {
+      color: #ea580c;
+      font-weight: 700;
+    }
+
+    .score-mod {
+      color: #d97706;
+      font-weight: 700;
+    }
+
+    .score-safe {
+      color: #16a34a;
+      font-weight: 700;
+    }
+
+    .mono {
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      color: #6b7280;
+    }
+
+    .preview {
+      max-width: 220px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── FOOTER ── */
+    .doc-footer {
+      margin-top: 24px;
+      padding-top: 12px;
+      border-top: 1px solid #e4e7ed;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="print-bar">
+    📄 ScamShield Scan History Report — Ready to save as PDF
+    <button class="print-btn" onclick="window.print()">🖨 Print / Save as PDF</button>
+  </div>
+
+  <div class="content">
+    <!-- HEADER -->
+    <div class="doc-header">
+      <div class="doc-logo">
+        <div class="logo-sq">S</div>
+        <div>
+          <div class="logo-name">ScamShield</div>
+          <div class="logo-sub">ScamShield Security Engine</div>
+        </div>
+      </div>
+      <div class="doc-meta">
+        <div><strong>Scan History Report</strong></div>
+        <div>Generated: {{ generated }}</div>
+        <div>Total records: {{ scans|length }}</div>
+        <div>Classification: NIST PQC / BFV-HE</div>
+        <div>Plaintext stored: NEVER</div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-strip">
+      <div class="stat-box t">
+        <div class="stat-val">{{ stats.total }}</div>
+        <div class="stat-key">Total Scans</div>
+      </div>
+      <div class="stat-box a">
+        <div class="stat-val">{{ stats.avg }}</div>
+        <div class="stat-key">Avg Risk</div>
+      </div>
+      <div class="stat-box c">
+        <div class="stat-val">{{ stats.critical }}</div>
+        <div class="stat-key">Critical</div>
+      </div>
+      <div class="stat-box h">
+        <div class="stat-val">{{ stats.high }}</div>
+        <div class="stat-key">High</div>
+      </div>
+      <div class="stat-box s">
+        <div class="stat-val">{{ stats.safe }}</div>
+        <div class="stat-key">Safe</div>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="section-title">
+      Scan Log
+      <span>Sorted by most recent · showing {{ scans|length }} records</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Timestamp</th>
+          <th>Message Preview</th>
+          <th>Level</th>
+          <th>Risk</th>
+          <th>ML %</th>
+          <th>Kyber CT</th>
+          <th>HE Hash</th>
+          <th>Fingerprint</th>
+          <th>ms</th>
+          <th>IP Hash</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if scans %}
+        {% for s in scans %}
+        <tr>
+          <td style="color:#9ca3af">{{ s.id }}</td>
+          <td class="mono">{{ (s.ts or '')[:19] }}</td>
+          <td class="preview" title="{{ s.preview }}">{{ s.preview }}</td>
+          <td>
+            <span class="badge b{{ s.level[0] }}">
+              {% if s.level=='Critical' %}☣{% elif s.level=='High' %}⚠{% elif s.level=='Moderate' %}◈{% else %}✓{% endif
+              %}
+              {{ s.level }}
+            </span>
+          </td>
+          <td
+            class="score-{% if s.score>=75 %}crit{% elif s.score>=50 %}high{% elif s.score>=28 %}mod{% else %}safe{% endif %}">
+            {{ s.score }}
+          </td>
+          <td>{{ s.ml_prob }}%</td>
+          <td class="mono">{{ (s.kyber_ct or '')[:14] }}…</td>
+          <td class="mono">{{ s.he_ph or '—' }}</td>
+          <td class="mono">{{ (s.fp or '')[:16] }}…</td>
+          <td style="color:#9ca3af">{{ s.ms }}</td>
+          <td class="mono">{{ s.ip_hash or '—' }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="11" style="text-align:center;padding:32px;color:#9ca3af">No scans recorded yet.</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+
+    <!-- FOOTER -->
+    <div class="doc-footer">
+      <span>ScamShield — ScamShield Security Engine · NIST FIPS 203/204</span>
+      <span>Privacy policy: No plaintext messages stored — SHA3-256 fingerprints only</span>
+      <span>{{ generated }}</span>
+    </div>
+  </div>
+
+</body>
+
+</html>

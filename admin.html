@@ -1,0 +1,1639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ScamShield Admin — Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    :root {
+      --bg: #f8f9fb;
+      --white: #fff;
+      --sidebar-bg: #1d2230;
+      --sidebar-hover: #2a3245;
+      --border: #e4e7ed;
+      --border-light: #f0f2f5;
+      --text: #1a1d23;
+      --text-2: #4b5563;
+      --text-3: #9ca3af;
+      --orange: #f6821f;
+      --orange-light: #fff7f0;
+      --orange-border: #fed7aa;
+      --blue: #1d4ed8;
+      --blue-light: #eff6ff;
+      --blue-border: #bfdbfe;
+      --green: #16a34a;
+      --green-light: #f0fdf4;
+      --green-border: #bbf7d0;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --red-border: #fecaca;
+      --yellow: #d97706;
+      --yellow-light: #fffbeb;
+      --yellow-border: #fde68a;
+      --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06), 0 1px 2px rgba(0, 0, 0, .04);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, .07), 0 2px 4px -1px rgba(0, 0, 0, .04);
+      --radius: 8px;
+      --sw: 220px;
+      --th: 56px;
+      --font: 'Inter', -apple-system, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh
+    }
+
+    /* sidebar */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: var(--sw);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      overflow-y: auto
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, .07)
+    }
+
+    .lm {
+      width: 32px;
+      height: 32px;
+      background: var(--orange);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .lt {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -.01em
+    }
+
+    .ls- {
+      font-size: 10px;
+      color: rgba(255, 255, 255, .4);
+      margin-top: 1px
+    }
+
+    .sl {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      color: rgba(255, 255, 255, .3);
+      text-transform: uppercase;
+      padding: 20px 20px 6px
+    }
+
+    .si {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 20px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, .65);
+      cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+      border-left: 3px solid transparent
+    }
+
+    .si:hover {
+      background: var(--sidebar-hover);
+      color: #fff
+    }
+
+    .si.active {
+      background: rgba(246, 130, 31, .12);
+      color: #fff;
+      border-left-color: var(--orange)
+    }
+
+    .si svg {
+      flex-shrink: 0;
+      opacity: .7
+    }
+
+    .si.active svg,
+    .si:hover svg {
+      opacity: 1
+    }
+
+    .ss {
+      padding: 5px 20px 5px 46px;
+      font-size: 12px;
+      color: rgba(255, 255, 255, .45);
+      cursor: pointer;
+      text-decoration: none;
+      transition: color .15s;
+      display: block
+    }
+
+    .ss:hover,
+    .ss.active {
+      color: rgba(255, 255, 255, .9)
+    }
+
+    .live-badge {
+      margin-left: auto;
+      background: rgba(22, 163, 74, .2);
+      color: #4ade80;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600
+    }
+
+    /* topbar */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: var(--sw);
+      right: 0;
+      height: var(--th);
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      z-index: 90;
+      box-shadow: var(--shadow-sm)
+    }
+
+    .dc {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500
+    }
+
+    .sdot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green)
+    }
+
+    .abadge {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--red);
+      background: var(--red-light);
+      border: 1px solid var(--red-border);
+      padding: 2px 8px;
+      border-radius: 12px
+    }
+
+    .tbtn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text);
+      transition: all .15s;
+      text-decoration: none
+    }
+
+    .tbtn:hover {
+      background: var(--bg)
+    }
+
+    .tbtn.red {
+      color: var(--red);
+      border-color: var(--red-border)
+    }
+
+    .tbtn.red:hover {
+      background: var(--red-light)
+    }
+
+    /* main */
+    .main {
+      margin-left: var(--sw);
+      padding-top: var(--th);
+      min-height: 100vh
+    }
+
+    .page-content {
+      padding: 32px;
+      max-width: 1200px
+    }
+
+    .page-header {
+      margin-bottom: 24px
+    }
+
+    .ph-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px
+    }
+
+    .page-breadcrumb {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-bottom: 4px
+    }
+
+    .page-title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -.025em
+    }
+
+    .page-desc {
+      font-size: 13px;
+      color: var(--text-2);
+      margin-top: 4px
+    }
+
+    /* export btns */
+    .export-group {
+      display: flex;
+      gap: 8px
+    }
+
+    .exp-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      background: var(--white);
+      color: var(--text-2);
+      transition: all .15s
+    }
+
+    .exp-btn:hover {
+      background: var(--bg);
+      color: var(--text)
+    }
+
+    .exp-btn.csv:hover {
+      border-color: var(--green);
+      color: var(--green);
+      background: var(--green-light)
+    }
+
+    .exp-btn.pdf:hover {
+      border-color: var(--red);
+      color: var(--red);
+      background: var(--red-light)
+    }
+
+    /* login */
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - var(--th));
+      padding: 40px
+    }
+
+    .login-card {
+      width: 420px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden
+    }
+
+    .lc-head {
+      padding: 28px;
+      border-bottom: 1px solid var(--border);
+      text-align: center
+    }
+
+    .lc-icon {
+      font-size: 32px;
+      margin-bottom: 10px
+    }
+
+    .lc-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text)
+    }
+
+    .lc-sub {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 4px
+    }
+
+    .lc-body {
+      padding: 28px
+    }
+
+    .flabel {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 6px;
+      display: block
+    }
+
+    input[type=password],
+    input[type=text] {
+      width: 100%;
+      font-family: var(--font);
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      outline: none;
+      transition: all .15s
+    }
+
+    input:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(246, 130, 31, .1)
+    }
+
+    .err {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--red);
+      font-weight: 500
+    }
+
+    .lbtn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 11px;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    .lbtn:hover {
+      background: #e8731a
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 14px;
+      font-size: 12px;
+      color: var(--text-3);
+      text-decoration: none
+    }
+
+    .back-link:hover {
+      color: var(--orange)
+    }
+
+    .hint-box {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 11px;
+      color: var(--text-3)
+    }
+
+    /* stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 14px;
+      margin-bottom: 24px
+    }
+
+    .sc {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      position: relative;
+      box-shadow: var(--shadow-sm);
+      overflow: hidden
+    }
+
+    .sc::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      border-radius: 0 0 var(--radius) var(--radius)
+    }
+
+    .sc.t::after {
+      background: var(--orange)
+    }
+
+    .sc.a::after {
+      background: #6366f1
+    }
+
+    .sc.c::after {
+      background: var(--red)
+    }
+
+    .sc.h::after {
+      background: #ea580c
+    }
+
+    .sc.s::after {
+      background: var(--green)
+    }
+
+    .sc-val {
+      font-size: 32px;
+      font-weight: 700;
+      transition: all .4s
+    }
+
+    .sc.t .sc-val {
+      color: var(--orange)
+    }
+
+    .sc.a .sc-val {
+      color: #6366f1
+    }
+
+    .sc.c .sc-val {
+      color: var(--red)
+    }
+
+    .sc.h .sc-val {
+      color: #ea580c
+    }
+
+    .sc.s .sc-val {
+      color: var(--green)
+    }
+
+    .sc-key {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: .05em
+    }
+
+    .live-pulse {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: livepulse 2s ease-in-out infinite
+    }
+
+    @keyframes livepulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(22, 163, 74, .4)
+      }
+
+      50% {
+        opacity: .6;
+        box-shadow: 0 0 0 5px rgba(22, 163, 74, 0)
+      }
+    }
+
+    /* charts */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      margin-bottom: 16px
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light)
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text)
+    }
+
+    .card-sub {
+      font-size: 12px;
+      color: var(--text-3);
+      margin-top: 2px
+    }
+
+    .card-body {
+      padding: 20px
+    }
+
+    .cc canvas {
+      max-height: 200px
+    }
+
+    /* ── API KEYS SECTION ── */
+    .api-key-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+      align-items: flex-end;
+      flex-wrap: wrap
+    }
+
+    .api-key-row input {
+      flex: 1;
+      min-width: 200px
+    }
+
+    .create-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 18px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--orange);
+      color: #fff;
+      border: none;
+      white-space: nowrap;
+      transition: background .15s
+    }
+
+    .create-btn:hover {
+      background: #e8731a
+    }
+
+    .key-reveal {
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      background: #f0fdf4;
+      border: 1px solid var(--green-border);
+      border-radius: 6px;
+      display: none
+    }
+
+    .key-reveal.show {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap
+    }
+
+    .key-code {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #166534;
+      flex: 1;
+      word-break: break-all
+    }
+
+    .copy-btn {
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--white);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+      border-radius: 5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all .15s
+    }
+
+    .copy-btn:hover {
+      background: var(--green);
+      color: #fff
+    }
+
+    .keys-table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    .keys-table th {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      text-align: left
+    }
+
+    .keys-table td {
+      font-size: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text);
+      vertical-align: middle
+    }
+
+    .keys-table tr:last-child td {
+      border-bottom: none
+    }
+
+    .key-label-badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--blue-light);
+      color: var(--blue);
+      border: 1px solid var(--blue-border);
+      padding: 2px 8px;
+      border-radius: 10px
+    }
+
+    .revoke-btn {
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--red);
+      background: var(--red-light);
+      border: 1px solid var(--red-border);
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .revoke-btn:hover {
+      background: var(--red);
+      color: #fff
+    }
+
+    .revoked-tag {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 500
+    }
+
+    .key-status-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green)
+    }
+
+    .key-status-active::before {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green)
+    }
+
+    .key-status-rev {
+      font-size: 11px;
+      color: var(--text-3)
+    }
+
+    /* ── EMAIL ALERT SECTION ── */
+    .alert-config {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .alert-field label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-2);
+      margin-bottom: 6px;
+      display: block
+    }
+
+    .alert-field input {
+      width: 100%
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 16px
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text)
+    }
+
+    .toggle-sub {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 2px
+    }
+
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 22px;
+      cursor: pointer;
+      transition: .2s
+    }
+
+    .slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: .2s
+    }
+
+    input:checked+.slider {
+      background: var(--orange)
+    }
+
+    input:checked+.slider::before {
+      transform: translateX(18px)
+    }
+
+    .alert-log-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600
+    }
+
+    .alb-sent {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green-border)
+    }
+
+    .alb-disabled {
+      background: var(--border-light);
+      color: var(--text-3);
+      border: 1px solid var(--border)
+    }
+
+    .alb-error {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid var(--red-border)
+    }
+
+    /* table */
+    .tbl-wrap {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden
+    }
+
+    .tctl {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-light);
+      flex-wrap: wrap;
+      gap: 10px
+    }
+
+    .fbtns {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center
+    }
+
+    .fb {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s
+    }
+
+    .fb:hover,
+    .fb.on {
+      border-color: var(--orange);
+      color: var(--orange);
+      background: var(--orange-light)
+    }
+
+    #si {
+      font-family: var(--font);
+      font-size: 12px;
+      color: var(--text);
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 12px;
+      outline: none;
+      width: 200px
+    }
+
+    #si:focus {
+      border-color: var(--orange);
+      box-shadow: 0 0 0 3px rgba(246, 130, 31, .1)
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    th {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-3);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      white-space: nowrap
+    }
+
+    th:hover {
+      color: var(--text-2);
+      cursor: pointer
+    }
+
+    td {
+      font-size: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text);
+      max-width: 180px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    tr:last-child td {
+      border-bottom: none
+    }
+
+    tr:hover td {
+      background: #fafafa
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600
+    }
+
+    .badge.C {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid var(--red-border)
+    }
+
+    .badge.H {
+      background: #fff4ee;
+      color: #ea580c;
+      border: 1px solid var(--orange-border)
+    }
+
+    .badge.M {
+      background: var(--yellow-light);
+      color: var(--yellow);
+      border: 1px solid var(--yellow-border)
+    }
+
+    .badge.S {
+      background: var(--green-light);
+      color: var(--green);
+      border: 1px solid var(--green-border)
+    }
+
+    .rmini {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .rmb {
+      width: 52px;
+      height: 4px;
+      background: var(--border-light);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .rmf {
+      height: 100%;
+      border-radius: 2px
+    }
+
+    .nodata {
+      text-align: center;
+      padding: 48px;
+      font-size: 13px;
+      color: var(--text-3)
+    }
+
+    .mono {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 10px
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      background: #1d2230;
+      box-shadow: var(--shadow);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      gap: 10px
+    }
+
+    .toast.show {
+      display: flex;
+      animation: slideup .3s ease
+    }
+
+    .toast.success {
+      background: var(--green)
+    }
+
+    .toast.error {
+      background: var(--red)
+    }
+
+    @keyframes slideup {
+      from {
+        transform: translateY(12px);
+        opacity: 0
+      }
+
+      to {
+        transform: none;
+        opacity: 1
+      }
+    }
+
+    @media(max-width:900px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr)
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr
+      }
+
+      .alert-config {
+        grid-template-columns: 1fr
+      }
+
+      .main {
+        margin-left: 0
+      }
+
+      .topbar {
+        left: 0
+      }
+
+      .sidebar {
+        display: none
+      }
+
+      .page-content {
+        padding: 20px
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="lm">S</div>
+      <div>
+        <div class="lt">ScamShield</div>
+        <div class="ls-">Admin Console</div>
+      </div>
+    </div>
+    <div class="sl">Navigation</div>
+    <a class="si" href="/"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      </svg>Scanner</a>
+    <a class="si" href="/bulk"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <rect x="2" y="3" width="20" height="4" />
+        <rect x="2" y="10" width="20" height="4" />
+        <rect x="2" y="17" width="20" height="4" />
+      </svg>Bulk Scanner</a>
+    <a class="si active" href="/admin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" />
+        <rect x="14" y="3" width="7" height="7" />
+        <rect x="14" y="14" width="7" height="7" />
+        <rect x="3" y="14" width="7" height="7" />
+      </svg>Dashboard<span class="live-badge">LIVE</span></a>
+    {% if logged %}
+    <a class="ss active" href="#stats">Overview</a>
+    <a class="ss" href="#scan-log">Scan log</a>
+    <a class="ss" href="#api-keys">API keys</a>
+    <a class="ss" href="#email-alerts">Email alerts</a>
+    <div class="sl">Export</div>
+    <a class="si" href="/admin/export/csv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>Download CSV</a>
+    <a class="si" href="/admin/export/pdf" target="_blank"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <polyline points="6 9 6 2 18 2 18 9" />
+        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+        <rect x="6" y="14" width="12" height="8" />
+      </svg>Print / PDF</a>
+    <div class="sl">Account</div>
+    <a class="si" href="/admin/logout"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+        <polyline points="16 17 21 12 16 7" />
+        <line x1="21" y1="12" x2="9" y2="12" />
+      </svg>Log out</a>
+    {% endif %}
+  </aside>
+
+  <header class="topbar">
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="dc">
+        <div class="sdot"></div>quantum-engine.local
+      </div>
+      <span class="abadge">Admin Zone</span>
+      {% if logged %}<span style="font-size:12px;color:var(--text-3)">Total scans: <strong id="live-count"
+          style="color:var(--text)">{{ stats.total }}</strong></span>{% endif %}
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      {% if logged %}
+      <a href="/admin/export/csv" class="exp-btn csv">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+        Export CSV
+      </a>
+      <a href="/admin/export/pdf" target="_blank" class="exp-btn pdf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 6 2 18 2 18 9" />
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+          <rect x="6" y="14" width="12" height="8" />
+        </svg>
+        Print PDF
+      </a>
+      <a href="/admin/logout" class="tbtn red">Log out</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main class="main">
+    <div class="page-content">
+
+      {% if not logged %}
+      <div class="login-wrap">
+        <div class="login-card">
+          <div class="lc-head">
+            <div class="lc-icon">🔐</div>
+            <div class="lc-title">Admin sign in</div>
+            <div class="lc-sub">ScamShield — ScamShield Security Engine</div>
+          </div>
+          <div class="lc-body">
+            <form method="POST" action="/admin">
+              <label class="flabel">Password</label>
+              <input type="password" name="pw" placeholder="Enter admin password" autofocus>
+              {% if error %}<div class="err">{{ error }}</div>{% endif %}
+              <button type="submit" class="lbtn">Sign in</button>
+            </form>
+            <a href="/" class="back-link">← Return to Scanner</a>
+            <div class="hint-box">Demo password: <strong>quantumadmin2025</strong></div>
+          </div>
+        </div>
+      </div>
+
+      {% else %}
+
+      <!-- PAGE HEADER -->
+      <div class="page-header" id="stats">
+        <div class="ph-row">
+          <div>
+            <div class="page-breadcrumb">Security</div>
+            <div class="page-title">Threat Analytics</div>
+            <div class="page-desc">Real-time scam scan analytics · No plaintext stored · Live counter active</div>
+          </div>
+          <div class="export-group">
+            <a href="/admin/export/csv" class="exp-btn csv">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              Export CSV
+            </a>
+            <a href="/admin/export/pdf" target="_blank" class="exp-btn pdf">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 6 2 18 2 18 9" />
+                <rect x="6" y="14" width="12" height="8" />
+              </svg>
+              Print / PDF
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-grid">
+        <div class="sc t">
+          <div class="live-pulse"></div>
+          <div class="sc-val" id="sc-total">{{ stats.total }}</div>
+          <div class="sc-key">Total Scans</div>
+        </div>
+        <div class="sc a">
+          <div class="sc-val">{{ stats.avg }}</div>
+          <div class="sc-key">Avg Risk Score</div>
+        </div>
+        <div class="sc c">
+          <div class="sc-val" id="sc-critical">{{ stats.critical }}</div>
+          <div class="sc-key">Critical</div>
+        </div>
+        <div class="sc h">
+          <div class="sc-val" id="sc-high">{{ stats.high }}</div>
+          <div class="sc-key">High</div>
+        </div>
+        <div class="sc s">
+          <div class="sc-val" id="sc-safe">{{ stats.safe }}</div>
+          <div class="sc-key">Safe</div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="charts-row">
+        <div class="card cc">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Threat distribution</div>
+              <div class="card-sub">By classification level</div>
+            </div>
+          </div>
+          <div class="card-body"><canvas id="tc"></canvas></div>
+        </div>
+        <div class="card cc">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Risk score histogram</div>
+              <div class="card-sub">Distribution across all scans</div>
+            </div>
+          </div>
+          <div class="card-body"><canvas id="rc"></canvas></div>
+        </div>
+      </div>
+
+      <!-- SCAN LOG TABLE -->
+      <div id="scan-log" class="tbl-wrap" style="margin-bottom:24px">
+        <div class="tctl">
+          <div class="fbtns">
+            <span style="font-size:13px;font-weight:600;color:var(--text);margin-right:4px">Scan log</span>
+            <button class="fb on" onclick="fil('ALL',this)">All</button>
+            <button class="fb" onclick="fil('Critical',this)">Critical</button>
+            <button class="fb" onclick="fil('High',this)">High</button>
+            <button class="fb" onclick="fil('Moderate',this)">Moderate</button>
+            <button class="fb" onclick="fil('Safe',this)">Safe</button>
+          </div>
+          <input id="si" placeholder="Search fingerprint or preview…" oninput="search()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Timestamp</th>
+              <th>Preview</th>
+              <th>Level</th>
+              <th>Risk</th>
+              <th>ML%</th>
+              <th>Kyber CT</th>
+              <th>Fingerprint</th>
+              <th>IP Hash</th>
+            </tr>
+          </thead>
+          <tbody id="tb">
+            {% if scans %}{% for s in scans %}
+            <tr data-t="{{ s.level }}">
+              <td style="color:var(--text-3);font-size:11px">{{ s.id }}</td>
+              <td class="mono" style="color:var(--text-3)">{{ (s.ts or '')[:19] }}</td>
+              <td title="{{ s.preview }}">{{ s.preview }}</td>
+              <td><span class="badge {{ s.level[0] }}">{% if s.level=='Critical' %}☣{% elif s.level=='High' %}⚠{% elif
+                  s.level=='Moderate' %}◈{% else %}✓{% endif %} {{ s.level }}</span></td>
+              <td>
+                <div class="rmini">
+                  <span
+                    style="font-weight:600;color:{% if s.score>=75 %}#dc2626{% elif s.score>=50 %}#ea580c{% elif s.score>=28 %}#d97706{% else %}#16a34a{% endif %}">{{
+                    s.score }}</span>
+                  <div class="rmb">
+                    <div class="rmf"
+                      style="width:{{ s.score }}%;background:{% if s.score>=75 %}#dc2626{% elif s.score>=50 %}#ea580c{% elif s.score>=28 %}#d97706{% else %}#16a34a{% endif %}">
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td style="font-weight:600">{{ s.ml_prob }}%</td>
+              <td class="mono" style="color:var(--text-3)">{{ (s.kyber_ct or '')[:16] }}…</td>
+              <td class="mono" style="color:var(--text-3)">{{ (s.fp or '')[:18] }}…</td>
+              <td class="mono" style="color:var(--text-3)">{{ s.ip_hash or '—' }}</td>
+            </tr>
+            {% endfor %}{% else %}
+            <tr>
+              <td colspan="9" class="nodata">No scans yet — run the first analysis.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- API KEYS -->
+      <div class="card" id="api-keys">
+        <div class="card-header">
+          <div>
+            <div class="card-title">API Keys</div>
+            <div class="card-sub">Authenticate external apps to call <code
+                style="font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">POST /api/scan</code> with
+              <code
+                style="font-size:11px;background:var(--bg);padding:1px 5px;border-radius:3px">X-API-Key: &lt;key&gt;</code>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="api-key-row">
+            <div style="flex:1">
+              <label class="flabel">Key label</label>
+              <input type="text" id="key-label" placeholder="e.g. my-integration, mobile-app…">
+            </div>
+            <button class="create-btn" onclick="createKey()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Generate new key
+            </button>
+          </div>
+
+          <div class="key-reveal" id="key-reveal">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+            <div style="flex:1">
+              <div style="font-size:11px;font-weight:600;color:var(--green);margin-bottom:4px">Key generated — copy now,
+                won't be shown again</div>
+              <div class="key-code" id="new-key-display"></div>
+            </div>
+            <button class="copy-btn" onclick="copyKey()">Copy</button>
+          </div>
+
+          <table class="keys-table">
+            <thead>
+              <tr>
+                <th>Label</th>
+                <th>Created</th>
+                <th>Last used</th>
+                <th>Calls</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="keys-tbody">
+              {% if api_keys %}{% for k in api_keys %}
+              <tr id="kr-{{ k.id }}">
+                <td><span class="key-label-badge">{{ k.label }}</span></td>
+                <td class="mono" style="color:var(--text-3)">{{ (k.created_at or '')[:10] }}</td>
+                <td class="mono" style="color:var(--text-3)">{{ (k.last_used or '—')[:16] }}</td>
+                <td style="font-weight:600">{{ k.total_calls }}</td>
+                <td>{% if k.active %}<span class="key-status-active">Active</span>{% else %}<span
+                    class="key-status-rev">Revoked</span>{% endif %}</td>
+                <td>{% if k.active %}<button class="revoke-btn" onclick="revokeKey({{ k.id }}, this)">Revoke</button>{%
+                  endif %}</td>
+              </tr>
+              {% endfor %}{% else %}
+              <tr>
+                <td colspan="6" class="nodata" style="padding:24px">No API keys yet.</td>
+              </tr>
+              {% endif %}
+            </tbody>
+          </table>
+
+          <div
+            style="margin-top:16px;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:12px;color:var(--text-2)">
+            <strong>Usage example</strong><br>
+            <code style="font-size:11px;display:block;margin-top:6px;color:var(--text-3)">
+        curl -X POST http://localhost:5000/api/scan \<br>
+        &nbsp;&nbsp;-H "X-API-Key: qrsse_your_key_here" \<br>
+        &nbsp;&nbsp;-H "Content-Type: application/json" \<br>
+        &nbsp;&nbsp;-d '{"message": "URGENT verify your bank account now"}'
+      </code>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMAIL ALERTS -->
+      <div class="card" id="email-alerts">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Email Alerts</div>
+            <div class="card-sub">Send automatic notifications when Critical or High threats are detected</div>
+          </div>
+          <span
+            style="font-size:11px;font-weight:600;color:{% if email_enabled %}var(--green){% else %}var(--text-3){% endif %}">
+            {% if email_enabled %}● Enabled{% else %}○ Disabled{% endif %}
+          </span>
+        </div>
+        <div class="card-body">
+          <div class="toggle-row">
+            <div>
+              <div class="toggle-label">Email notifications</div>
+              <div class="toggle-sub">Set <code style="font-size:11px">EMAIL_ENABLED = True</code> in app.py to activate
+              </div>
+            </div>
+            <label class="toggle">
+              <input type="checkbox" {% if email_enabled %}checked{% endif %} disabled>
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="alert-config">
+            <div class="alert-field">
+              <label>SMTP Host</label>
+              <input type="text" value="smtp.gmail.com" placeholder="smtp.gmail.com" disabled>
+            </div>
+            <div class="alert-field">
+              <label>SMTP Port</label>
+              <input type="text" value="587" placeholder="587" disabled>
+            </div>
+            <div class="alert-field">
+              <label>From address</label>
+              <input type="text" value="your@gmail.com" placeholder="your@gmail.com" disabled>
+            </div>
+            <div class="alert-field">
+              <label>Alert recipient</label>
+              <input type="text" value="admin@yourdomain.com" placeholder="admin@yourdomain.com" disabled>
+            </div>
+          </div>
+
+          <div
+            style="margin-top:14px;padding:12px 16px;background:var(--blue-light);border:1px solid var(--blue-border);border-radius:6px;font-size:12px;color:#1e40af">
+            <strong>Setup instructions:</strong> In <code>app.py</code>, set <code>EMAIL_ENABLED = True</code> and fill
+            in <code>SMTP_USER</code>, <code>SMTP_PASS</code>, and <code>ALERT_RECIPIENT</code>. Use a Gmail App
+            Password for SMTP auth. Alerts fire for <strong>Critical</strong> and <strong>High</strong> threats.
+          </div>
+        </div>
+      </div>
+
+      {% endif %}
+
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+  <script>
+    {% if logged %}
+    // ── Charts ─────────────────────────────────────
+    const rows = document.querySelectorAll('#tb tr[data-t]');
+    const tc = { Critical: 0, High: 0, Moderate: 0, Safe: 0 }, rb = [0, 0, 0, 0, 0];
+    rows.forEach(r => {
+      const t = r.dataset.t; if (tc[t] !== undefined) tc[t]++;
+      const s = parseFloat(r.querySelector('.rmini span')?.textContent || 0);
+      if (!isNaN(s)) rb[Math.min(Math.floor(s / 20), 4)]++;
+    });
+    const fontCfg = { family: 'Inter', size: 11 };
+    const gridColor = 'rgba(228,231,237,.8)';
+    const tickColor = '#9ca3af';
+
+    new Chart(document.getElementById('tc'), {
+      type: 'doughnut', data: {
+        labels: ['Critical', 'High', 'Moderate', 'Safe'],
+        datasets: [{
+          data: Object.values(tc),
+          backgroundColor: ['rgba(220,38,38,.8)', 'rgba(234,88,12,.8)', 'rgba(217,119,6,.8)', 'rgba(22,163,74,.8)'],
+          borderColor: ['#dc2626', '#ea580c', '#d97706', '#16a34a'],
+          borderWidth: 2, hoverOffset: 4
+        }]
+      }, options: { cutout: '62%', plugins: { legend: { labels: { color: tickColor, font: fontCfg, padding: 14 } } } }
+    });
+
+    new Chart(document.getElementById('rc'), {
+      type: 'bar', data: {
+        labels: ['0–20', '20–40', '40–60', '60–80', '80–100'],
+        datasets: [{
+          label: 'Scans', data: rb,
+          backgroundColor: ['rgba(22,163,74,.7)', 'rgba(6,182,212,.7)', 'rgba(217,119,6,.7)', 'rgba(234,88,12,.7)', 'rgba(220,38,38,.7)'],
+          borderColor: ['#16a34a', '#0891b2', '#d97706', '#ea580c', '#dc2626'],
+          borderWidth: 1, borderRadius: 4
+        }]
+      }, options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { ticks: { color: tickColor, font: fontCfg }, grid: { color: gridColor } },
+          y: { ticks: { color: tickColor, font: fontCfg }, grid: { color: gridColor }, beginAtZero: true }
+        }
+      }
+    });
+
+    // ── Table filter / search ────────────────────────
+    function fil(v, btn) {
+      document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      rows.forEach(r => r.style.display = (v === 'ALL' || r.dataset.t === v) ? '' : 'none');
+    }
+    function search() {
+      const q = document.getElementById('si').value.toLowerCase();
+      rows.forEach(r => r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none');
+    }
+
+    // ── Live counter (SSE) ───────────────────────────
+    const es = new EventSource('/api/live-count');
+    es.onmessage = e => {
+      const d = JSON.parse(e.data);
+      document.getElementById('sc-total').textContent = d.count;
+      const lc = document.getElementById('live-count');
+      if (lc) lc.textContent = d.count;
+    };
+    es.onerror = () => es.close();
+
+    // Also poll stats every 15s for critical/high/safe counters
+    setInterval(async () => {
+      try {
+        const r = await fetch('/api/stats');
+        const s = await r.json();
+        document.getElementById('sc-critical').textContent = s.critical;
+        document.getElementById('sc-high').textContent = s.high;
+        document.getElementById('sc-safe').textContent = s.safe;
+      } catch (e) { }
+    }, 15000);
+
+    // ── API key management ───────────────────────────
+    let newKey = '';
+    async function createKey() {
+      const label = document.getElementById('key-label').value.trim() || 'Unnamed key';
+      try {
+        const r = await fetch('/admin/api-keys/create', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ label })
+        });
+        const d = await r.json();
+        if (d.key) {
+          newKey = d.key;
+          document.getElementById('new-key-display').textContent = d.key;
+          document.getElementById('key-reveal').classList.add('show');
+          document.getElementById('key-label').value = '';
+          showToast('API key created — copy it now!', 'success');
+          setTimeout(() => location.reload(), 4000);
+        }
+      } catch (e) { showToast('Failed to create key', 'error'); }
+    }
+    function copyKey() {
+      navigator.clipboard.writeText(newKey).then(() => showToast('Copied to clipboard', 'success'));
+    }
+    async function revokeKey(id, btn) {
+      if (!confirm('Revoke this API key? This cannot be undone.')) return;
+      try {
+        await fetch('/admin/api-keys/revoke', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id })
+        });
+        btn.closest('tr').querySelector('.key-status-active').outerHTML = '<span class="key-status-rev">Revoked</span>';
+        btn.remove();
+        showToast('API key revoked', 'success');
+      } catch (e) { showToast('Failed to revoke', 'error'); }
+    }
+
+    // ── Toast ────────────────────────────────────────
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast show ${type}`;
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+    {% endif %}
+  </script>
+</body>
+
+</html>
